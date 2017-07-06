@@ -10,14 +10,26 @@
 					.grayBackground { background-color: #fafafa; }
 				</style>
 				<div class="row">
-		        	<div class="col-md-3">
-			        	<?php echo do_shortcode( '[wpdreams_ajaxsearchpro id=2]' ); ?>
-			        	<?php //echo do_shortcode( '[wpdreams_asp_settings id=2 element="div"]' ); ?>
-			        	<?php echo do_shortcode( '[searchandfilter id="294"]' ); ?>
+		        	<div class="col-md-4">
+			        	<?php echo do_shortcode( '[wpdreams_ajaxsearchpro id=3]' ); ?>
+			        	<?php echo do_shortcode( '[accordion]
+													    [section title="Advanced Filter"]
+														<h4>Primary Care</h4>
+														[facetwp facet="primary_care"]
+														<h4>Conditions Treated</h4>
+														[facetwp facet="conditions"]
+														<h4>Patient Types</h4>
+														[facetwp facet="patient_types"]
+														<h4>Gender</h4>
+														[facetwp facet="physician_gender"]
+														<h4>Language(s)</h4>
+														[facetwp facet="physician_language"]
+														[/section]
+													[/accordion]' ); ?>
 		        	</div>
-					<div class="col-md-9">
+					<div class="col-md-8 facetwp-template people">
+						<style> .people h2, .people h3 { margin-top:0; } </style>
 					    <?php $i = 0; ?>
-						<?php echo do_shortcode( '[wd_asp elements="results" id=2]' ); ?>
 					    <?php while ( have_posts() ) : the_post(); ?>
 					    <?php $class = ($i%2 == 0)? 'whiteBackground': 'grayBackground'; ?>
 					    <?php $full_name = get_field('person_first_name') .' ' .(get_field('person_middle_name') ? get_field('person_middle_name') . ' ' : '') . get_field('person_last_name') . (get_field('person_degree') ? ', ' . get_field('person_degree') : '');
@@ -25,6 +37,9 @@
 					    ?>
 					    <div class="<?php echo $class; ?>" style="border:1px solid #ececec;padding:10px; margin-bottom: 10px;">
 					        <div class="row">
+						        <div class="col-md-12"><a href="<?php echo $profileurl; ?>"><h2 style="margin-top: 0;"><?php echo $full_name; ?></h2></a></div>
+					    	</div>
+							<div class="row">
 					            <div class="col-md-3" style="margin-top:0px;margin-bottom:20px;">
 						            <div style="padding-bottom: 1em;">
 		                            	<span style="-moz-box-shadow: 0 0 3px rgba(0,0,0,.3);-webkit-box-shadow: 0 0 3px rgba(0,0,0,.3);box-shadow: 0 0 3px rgba(0,0,0,.3);"><a href="<?php echo $profileurl; ?>" target="_self"><img src="<?php the_field('person_photo'); ?>" alt="<?php echo $full_name; ?>" class="img-responsive"></a></span>
@@ -38,7 +53,6 @@
 									<?php } ?>
 					            </div>
 					            <div class="col-md-9" style="margin-top:0px;margin-bottom:0px;">
-			                        <a href="<?php echo $profileurl; ?>"><h2><?php echo $full_name; ?></h2></a>
 					                    <div class="row" style="margin-top:0px;margin-bottom:0px;">
 					                        <div class="col-md-6">
 

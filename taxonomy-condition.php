@@ -63,11 +63,13 @@
 					.grayBackground { background-color: #fafafa; }
 				</style>
 				<div class="row">
-		        	<div class="col-md-4">
-			        	<?php echo do_shortcode( '[searchandfilter id="294"]' ); ?>
-		        	</div>
-					<div class="col-md-8">
+
+					<div class="col-md-8 facetwp-template">
 					    <?php $i = 0; ?>
+
+					    <h1>Condition: <?php echo single_cat_title( '', false ); ?></h1><hr>
+
+					    <?php echo (term_description( '', false ) ? '<p>' .term_description( '', false ) . '</p>' : '' ); ?>
 
 					    <?php while ( $the_query->have_posts() ) : $the_query->the_post(); ?>
 					    <?php $class = ($i%2 == 0)? 'whiteBackground': 'grayBackground'; ?>
@@ -255,6 +257,23 @@ echo paginate_links( array(
 ) );
 ?></div>
 					</div><!-- .col -->
+					<div class="col-md-4">
+			        	<?php echo do_shortcode( '[wpdreams_ajaxsearchpro id=4]' ); ?>
+			        	<?php echo do_shortcode( '[accordion]
+													    [section title="Advanced Filter"]
+														<h4>Primary Care</h4>
+														[facetwp facet="primary_care"]
+														<h4>Conditions Treated</h4>
+														[facetwp facet="conditions"]
+														<h4>Patient Types</h4>
+														[facetwp facet="patient_types"]
+														<h4>Gender</h4>
+														[facetwp facet="physician_gender"]
+														<h4>Language(s)</h4>
+														[facetwp facet="physician_language"]
+														[/section]
+													[/accordion]' ); ?>
+		        	</div>
 				</div><!-- .row -->
    			</div><!-- main_content -->
 

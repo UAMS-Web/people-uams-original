@@ -48,19 +48,19 @@
 				if ($isItPhysician!==false)
 				{
 				    //url contains 'physician'
-				    echo "<h4>Physician</h4>";
+				    //echo "<h4>Physician</h4>";
 				    get_template_part( 'templates/list-physician' );
 				}
 				elseif ($isItAcademic!==false)
 				{
 				    //url contains 'academic'
-				    echo "<h4>Academic</h4>";
+				    //echo "<h4>Academic Profiles</h4>";
 				    get_template_part('templates/list-academic' );
 				}
 				else
 				{
 					//load base
-					echo "<h4>Base</h4>";
+					echo "<h4>Base Profiles</h4>";
 					get_template_part('templates/list-people' );
 				}
 				?>

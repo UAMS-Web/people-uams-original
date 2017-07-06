@@ -6,6 +6,7 @@ add_filter('_includes/acf-pro/settings/show_admin', '__return_true');
 
 require( 'setup/class.people.php' );
 require( 'setup/class.people-custom-post.php' );
+require( 'setup/class.people-acf.php' );
 
 // ACF User Role Filter - Disable Nag
 add_filter('remove_hube2_nag', '__return_true');
@@ -80,7 +81,33 @@ if ($image != “” && strlen($image) < 10) {
 }
 */
 
-// Include only the Physician profile_type
+// Sort by last name, first name, middle name
+add_action( 'pre_get_posts', 'cd_sort_people' );
+function cd_sort_people( $query ) {
+    if ( $query->is_main_query() && !is_admin() ) {
+        if ( $query->is_tax() || $query->is_post_type_archive('people') ) {
+	        $query->set('meta_query', array(
+                'person_last_name' => array(
+                    'key' => 'person_last_name',
+                ),
+                'person_first_name' => array(
+                    'key' => 'person_first_name',
+                ),
+                'person_middle_name' => array(
+                    'key' => 'person_middle_name',
+                )
+            ));
+            $query->set('orderby',array(
+                'person_last_name' => 'ASC',
+                'person_first_name' => 'ASC',
+                'person_middle_name' => 'ASC'
+            ));
+        }
+    }
+}
+
+// Include only the specific profile_type
+// Ajax Search Pro
 add_filter( 'asp_query_args', 'asp_include_only_term_ids', 2, 2 );
 
 function asp_include_only_term_ids( $args, $id ) {
@@ -89,10 +116,19 @@ function asp_include_only_term_ids( $args, $id ) {
    * For example, if you want to search category 1 and 2, then:
    *  "category" => "1,2"
    */
-  $include = array(
-    "profile_type" => "32",
-    //"post_tag" => "4,5,6,7"
-  );
+   if ($id == '4') {
+      // Physician
+	  $include = array(
+	    "profile_type" => "32", //Update based on real site - 487 on people.uams
+	    //"post_tag" => "4,5,6,7"
+	  );
+  } elseif ($id == '6') {
+	 // Academic
+	 $include = array(
+	    "profile_type" => "31", //Update based on real site - 486 on people.uams
+	    //"post_tag" => "4,5,6,7"
+	  );
+  }
 
   // -- !! Do not change anything below this line !! --
   if ( !is_array($args['post_tax_filter']) )
@@ -112,28 +148,41 @@ function asp_include_only_term_ids( $args, $id ) {
   return $args;
 }
 
-// URL modification
-add_filter( 'asp_results', 'asp_custom_link_meta_results', 1, 1 );
-function asp_custom_link_meta_results( $results ) {
+// URL modification for Ajax Search Pro
+add_filter( 'asp_results', 'asp_custom_link_meta_results', 1, 2 );
+function asp_custom_link_meta_results( $results, $id ) {
 
   // Change this variable to whatever meta key you are using
-  //$key = 'custom_url';
+  //$key = 'profile_type';
 
   // Parse through each result item
-  foreach ($results as $k=>$v) {
-	  if (($v->content_type == "pagepost") && (get_post_type($v->id) == "people"))
-	  	$new_url = '/directory/physician/' . get_post_field( 'post_name', $v->id ) .'/';
-    //if ( function_exists('get_field') )
-    //    $new_url = get_field( $v->id, $key, true ); // ACF support
-    //else
-        //$new_url = get_post_meta( $v->id, $key, true );
-
-    // Change only, if the meta is specified
-    if ($new_url != '')
-      $results[$k]->link  = $new_url;
-  }
-
-  return $results;
+    if ($id == '4') {
+	  // Parse through each result item
+	  $new_url = '';
+	  foreach ($results as $k=>$v) {
+		  if (($v->content_type == "pagepost") && (get_post_type($v->id) == "people")) {
+		  		$new_url = '/directory/physician/' . get_post_field( 'post_name', $v->id ) .'/';
+		  }
+		  // Change only, if the meta is specified
+		  if ($new_url != '')
+	      		$results[$k]->link  = $new_url;
+	      $new_url = ''; //Reset
+	  }
+	  return $results;
+	}
+	if ($id == '6'){
+		$new_url = '';
+		foreach ($results as $k=>$v) {
+		  if (($v->content_type == "pagepost") && (get_post_type($v->id) == "people")) {
+		  		$new_url = '/directory/academic/' . get_post_field( 'post_name', $v->id ) .'/';
+		  }
+		  // Change only, if the meta is specified
+		  if ($new_url != '')
+	      		$results[$k]->link  = $new_url;
+	      $new_url = ''; //Reset
+	  	}
+	  	return $results;
+	}
 }
 
 
@@ -197,7 +246,7 @@ class pubmed_field_on_change {
 
 			// create full reference
 			$full = $authorlist . ' ' . $title . ' ' . $source . '. ' . $date . '; ';
-			$full .= $volume . '('. $issue .'):' . $pages . '. ' . $doi . ' Pubmed PMID: <a href="https://www.ncbi.nlm.nih.gov/pubmed/' . $idstr . '" target="_blank>' . $idstr . '</a>';
+			$full .= $volume . '('. $issue .'):' . $pages . '. ' . $doi . ' PMID: ' . $idstr . '. <br/> View in Pubmed: <a href="https://www.ncbi.nlm.nih.gov/pubmed/' . $idstr . '" target="_blank">' . $idstr . '</a>';
 
 			// put all the values into an array and return it as json
 			$array = array(
@@ -251,3 +300,24 @@ class pubmed_field_on_change {
 	} // end public function enqueue_script
 
 } // end class my_dynmamic_field_on_relationship
+
+// Pubmed API shortcode
+// Example: [pubmed terms="Chernoff%20R%5BAuthor%5D" count="10"]
+function pubmed_register() {
+	if ( !is_admin() ) {
+		wp_register_script( 'pubmed-api', get_stylesheet_directory_uri() . '/js/pubmed-api-async.js', array('jquery'), null, true );
+	}
+}
+add_action( 'wp_enqueue_scripts', 'pubmed_register' );
+function uams_pubmed_shortcode( $atts ) {
+
+	/* call the javascript to support the api */
+	wp_enqueue_script( 'pubmed-api' );
+
+	$atts = shortcode_atts( array(
+		'terms' => '',
+		'count' => '20',
+	), $atts, 'pubmed' );
+	return "<ul class=\"pubmed-list\" data-terms=\"{$atts['terms']}\" data-count=\"{$atts['count']}\"></ul>";
+}
+add_shortcode( 'pubmed', 'uams_pubmed_shortcode' );

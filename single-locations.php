@@ -211,7 +211,7 @@
 			})(jQuery);
 			</script>
 
-		    <div style="margin-bottom: 10px; max-width: 450px;"><?php echo do_shortcode( '[wpdreams_ajaxsearchpro id=1]' ); ?></div>
+		    <div style="margin-bottom: 10px; max-width: 450px;"><?php echo do_shortcode( '[wpdreams_ajaxsearchpro id=4]' ); ?></div>
 		    <?php while ( have_posts() ) : the_post(); ?>
 		    	<h1><?php the_title(); ?></h1>
 

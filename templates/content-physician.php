@@ -210,14 +210,14 @@
 
 			})(jQuery);
 			</script>
-			<h2>Physician</h2>
-			<div style="margin-bottom: 10px; max-width: 450px;"><?php echo do_shortcode( '[wpdreams_ajaxsearchpro id=1]' ); ?></div>
+<!-- 			<h2>Physician</h2> -->
+			<div style="margin-bottom: 10px; max-width: 450px;"><?php echo do_shortcode( '[wpdreams_ajaxsearchpro id=4]' ); ?></div>
 	        <div class="row">
 		        <div class="col-md-8">
 	                <h1 class="title-heading-left" data-fontsize="34" data-lineheight="48"><?php the_field('person_first_name'); ?> <?php echo (get_field('person_middle_name') ? get_field('person_middle_name') : ''); ?> <?php the_field('person_last_name'); ?><?php echo (get_field('person_degree') ? ', ' . get_field('person_degree') : ''); ?></h1>
 	                    <?php echo (get_field('physician_title') ? '<h4>' . get_field('physician_title') .'</h4>' : ''); ?>
 	            </div>
-				<div class="col-md-4">
+				<div class="col-md-4" style="padding-top: 42px;">
 	                <div class="fusion-button-wrapper">
 	                    <a class="uams-btn btn-lg" target="_self" title="Make an Appointment" href="<?php the_field('physician_appointment_link'); ?>">Make an Appointment</a>
 	                </div>
@@ -265,23 +265,30 @@
 		                <ul class="js-tablist tabs__uams_ul" data-hx="h2">
 	                    	<li class="js-tablist__item tabs__uams__li">
 	                    		<a href="#tab-overview" id="label_tab-overview" class="js-tablist__link tabs__uams__a" data-toggle="tab">
-	                            	<i class="fa fontawesome-icon fa-book"></i>Overview
+	                            	Overview
 	                            </a>
 	                        </li>
 	                        <li class="js-tablist__item tabs__uams__li">
 	                            <a href="#tab-academics" id="label_tab-academics" class="js-tablist__link tabs__uams__a" data-toggle="tab">
-		                            <i class="fa fontawesome-icon fa-graduation-cap"></i>Academics
+		                            Academics
 		                        </a>
 	                        </li>
 	                        <li class="js-tablist__item tabs__uams__li">
 	                            <a href="#tab-location" id="label_tab-location" class="js-tablist__link tabs__uams__a" data-toggle="tab">
-		                            <i class="fa fontawesome-icon fa-map-marker"></i>Location
+		                            Location
 		                        </a>
 	                        </li>
+	                    <?php if(get_field('person_researcher_bio')||get_field('person_research_interests')): ?>
+	                    	<li class="js-tablist__item tabs__uams__li">
+	                            <a href="#tab-research" id="label_tab-research" class="js-tablist__link tabs__uams__a" data-toggle="tab">
+		                            Research
+		                        </a>
+	                        </li>
+	                    <?php endif; ?>
 	                    <?php if(have_rows('person_awards')||get_field('person_additional_info')): ?>
 	                    	<li class="js-tablist__item tabs__uams__li">
 	                            <a href="#tab-info" id="label_tab-info" class="js-tablist__link tabs__uams__a" data-toggle="tab">
-		                            <i class="fa fontawesome-icon fa-info-circle"></i>Additional Info
+		                            Additional Info
 		                        </a>
 	                        </li>
 	                    <?php endif; ?>
@@ -349,11 +356,12 @@
                             	</div>
 								<?php } ?>
 							</div>
+						<?php if(get_field('person_academic_appointment')||get_field('person_education')||get_field('physician_boards')||get_field('person_publications')||get_field('person_pubmed_author_id')): ?>
 	                        <div id="tab-academics" class="js-tabcontent tabs__uams__tabcontent">
-	                            <?php if( have_rows('academic_appointment') ): ?>
+	                            <?php if( have_rows('person_academic_appointment') ): ?>
 	                            	<h3>Academic Appointments</h3>
 								    <ul>
-								    <?php while( have_rows('academic_appointment') ): the_row(); ?>
+								    <?php while( have_rows('person_academic_appointment') ): the_row(); ?>
 								        <li><?php the_sub_field('academic_title'); ?>, <?php the_sub_field('academic_department'); ?></li>
 								    <?php endwhile; ?>
 								    </ul>
@@ -366,7 +374,7 @@
 								    <?php endwhile; ?>
 								    </ul>
 								<?php endif; ?>
-								<?php if( have_rows('person_boards') ): ?>
+								<?php if( have_rows('physician_boards') ): ?>
 	                            	<h3>Professional Certifications</h3>
 								    <ul>
 								    <?php while( have_rows('physician_boards') ): the_row(); ?>
@@ -378,11 +386,24 @@
 	                            	<h3>Selected Publications</h3>
 								    <ul>
 								    <?php while( have_rows('person_publications') ): the_row(); ?>
-								        <li><?php the_sub_field('pub_authors'); ?> (<?php the_sub_field('pub_published'); ?>) <?php the_sub_field('pub_title'); ?> <em><?php the_sub_field('pub_periodical'); ?> <?php echo ( get_sub_field('pub_volume') ? the_sub_field('pub_volume') : ''); ?></em><?php echo ( get_sub_field( 'pub_issue') ? '(' . the_sub_field('pub_issue') .')' : ''); ?> <?php the_sub_field('pub_pmid'); ?> <?php the_sub_field('pub_pmcid'); ?> </li>
+								        <li><?php echo get_sub_field('publication_pubmed_info'); ?></li>
 								    <?php endwhile; ?>
 								    </ul>
 								<?php endif; ?>
+								<?php if( get_field('person_pubmed_author_id') ): ?>
+									<?php
+										$pubmedid = trim(get_field('person_pubmed_author_id'));
+										$pubmedcount = (get_field('pubmed_author_number') ? get_field('pubmed_author_number') : '3')
+
+									?>
+	                            	<h3>Latest Publications</h3>
+								    <?php echo do_shortcode( '[pubmed terms="' . urlencode($pubmedid) .'%5BAuthor%5D" count="' . $pubmedcount .'"]' ); ?>
+								<?php endif; ?>
+								<?php if( get_field('person_research_profiles_link') ): ?>
+	                            	More information is available on <a href="<?php the_field('person_research_profiles_link'); ?>">UAMS Profile Page</a>
+								<?php endif; ?>
 	                        </div>
+	                    <?php endif; ?>
 	                        <div id="tab-location" class="js-tabcontent tabs__uams__tabcontent">
 	                            <?php
 
@@ -419,13 +440,26 @@
 								    <?php wp_reset_postdata(); // IMPORTANT - reset the $post object so the rest of the page works correctly ?>
 								<?php endif; ?>
 	                        </div>
+	                        <?php if( get_field('person_researcher_bio') || get_field('person_research_interests') ): ?>
+	                        <div id="tab-research" class="js-tabcontent tabs__uams__tabcontent">
+	                            <?php echo (get_field('person_researcher_bio') ? get_field('person_researcher_bio') : ''); ?>
+								<?php
+									if(get_field('person_research_interests'))
+									{ ?>
+									<h3>Research Interests</h3>
+									<?php	echo get_field('person_research_interests');
+									}
+								?>
+	                        </div>
+	                    <?php endif; ?>
 						<?php if(have_rows('person_awards')||get_field('person_additional_info')): ?>
 	                        <div id="tab-info" class="js-tabcontent tabs__uams__tabcontent">
 	                            <?php if( have_rows('person_awards') ): ?>
 	                            	<h3>Awards</h3>
 								    <ul>
 								    <?php while( have_rows('person_awards') ): the_row(); ?>
-								        <li><?php the_sub_field('award_infor'); ?> (<?php the_sub_field('award_year'); ?>)</li>
+								        <li><?php the_sub_field('award_title'); ?> (<?php the_sub_field('award_year'); ?>)
+								        <?php echo (get_sub_field('award_infor') ? '<br/>' . get_sub_field('award_infor') : ''); ?></li>
 								    <?php endwhile; ?>
 								    </ul>
 								<?php endif; ?>

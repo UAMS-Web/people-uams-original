@@ -11,7 +11,7 @@
 				</style>
 				<div class="row">
 					<div class="col-md-12">
-						<div style="margin-bottom: 10px; max-width: 650px;"><?php echo do_shortcode( '[wpdreams_ajaxsearchpro id=1]' ); ?></div>
+						<?php //echo do_shortcode( '[wpdreams_ajaxsearchpro id=1]' ); ?>
 					</div>
 				</div>
 				<div class="row">

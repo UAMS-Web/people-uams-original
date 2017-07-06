@@ -1,40 +1,79 @@
 <?php
-	/**
-	 *  Template Name: People
-	 *  Designed for people archive, where type != academic && != physician
-	 */
- ?>
+   	// get the currently queried taxonomy term, for use later in the template file
+	$term = get_queried_object();
 
-			    <style>
+	// Define the query
+	$args = array(
+	    'post_type' => 'people',
+	    'specialty' => $term->slug,
+	    'meta_query'	=> array(
+			array(
+				'key'		=> 'profile_type',
+				'value'		=> '"Academic"',
+				'compare'	=> 'LIKE'
+			)
+		)
+	);
+
+
+   	get_header();
+   	$sidebar = get_post_meta($post->ID, "sidebar");
+   	$breadcrumbs = get_post_meta($post->ID, "breadcrumb");
+ ?>
+<?php
+	function custom_field_excerpt($title) {
+			global $post;
+			$text = get_field($title);
+			if ( '' != $text ) {
+				$text = strip_shortcodes( $text );
+				$text = apply_filters('the_content', $text);
+				$text = str_replace(']]>', ']]>', $text);
+				$excerpt_length = 35; // 35 words
+				$excerpt_more = apply_filters('excerpt_more', ' ' . '[...]');
+				$text = wp_trim_words( $text, $excerpt_length, $excerpt_more );
+			}
+			return apply_filters('the_excerpt', $text);
+		}
+	function wpdocs_custom_excerpt_length( $length ) {
+	    return 35; // 35 words
+	}
+	add_filter( 'excerpt_length', 'wpdocs_custom_excerpt_length', 999 );
+
+	?>
+	<?php get_template_part( 'header', 'image' ); ?>
+
+	<!--<div class="col-md-12 mobile-menu"> <?php get_template_part( 'menu', 'mobile' ); ?> </div>-->
+	<div class="container uams-body">
+
+	  <div class="row">
+
+	    <div class="col-md-12 uams-content" role='main'>
+
+	      <?php
+
+		      if((!isset($breadcrumbs[0]) || $breadcrumbs[0]!="on")) {
+		      	get_template_part( 'breadcrumbs' );
+		      }
+		  ?>
+
+	      <div id='main_content' class="uams-body-copy" tabindex="-1">
+
+		      <style>
 				    .whiteBackground { background-color: #fff; }
 					.grayBackground { background-color: #fafafa; }
 				</style>
 				<div class="row">
-					<div class="col-md-12">
-						<?php // echo do_shortcode( '[wpdreams_ajaxsearchpro id=1]' ); ?>
-					</div>
-				</div>
-				<div class="row">
-		        	<div class="col-md-4">
-			        	<?php echo do_shortcode( '[wpdreams_ajaxsearchpro id=4]' ); ?>
-			        	<?php echo do_shortcode( '[accordion]
-													    [section title="Advanced Filter"]
-														<h4>College Affiliation</h4>
-														[facetwp facet="college_affiliation"]
-														<h4>Position Type</h4>
-														[facetwp facet="academic_position"]
-														[/section]
-													[/accordion]' ); ?>
-
-
-		        	</div>
 					<div class="col-md-8 facetwp-template">
 					    <?php $i = 0; ?>
+
+					    <h1><?php echo single_cat_title( '', false ); ?></h1><hr>
+
+					    <?php echo (term_description( '', false ) ? '<p>' .term_description( '', false ) . '</p>' : '' ); ?>
 
 					    <?php while ( have_posts() ) : the_post(); ?>
 					    <?php $class = ($i%2 == 0)? 'whiteBackground': 'grayBackground'; ?>
 					    <?php $full_name = get_field('person_first_name') .' ' .(get_field('person_middle_name') ? get_field('person_middle_name') . ' ' : '') . get_field('person_last_name') . (get_field('person_degree') ? ', ' . get_field('person_degree') : '');
-						      $profileurl = '/directory/academic/' . $post->post_name .'/';
+						      $profileurl = '/directory/academci/' . $post->post_name .'/';
 					    ?>
 					    <div class="<?php echo $class; ?>" style="border:1px solid #ececec;padding:10px; margin-bottom: 10px;">
 						    <div class="row">
@@ -63,7 +102,8 @@
 			                        <a class="uams-btn btn-blue btn-sm" target="_self" title="View Profile" href="<?php echo $profileurl; ?>">View Profile</a>
 					            </div>
 					            <div class="col-md-9" style="margin-top:0px;margin-bottom:0px;">
-			                            <div class="row" style="margin-top:0px;margin-bottom:0px;">
+			                        <a href="<?php echo $profileurl; ?>"><h2><?php echo $full_name; ?></h2></a>
+					                    <div class="row" style="margin-top:0px;margin-bottom:0px;">
 					                        <div class="col-md-6">
 					                            <p><?php echo ( get_field('person_academic_short_bio') ? get_field( 'person_academic_short_bio') : wp_trim_words( get_field( 'person_academic_bio' ), 30, ' &hellip;' ) ); ?></p>
 					                            <a class="more" target="_self" title="View Profile" href="<?php echo $profileurl; ?>">View Profile</a>
@@ -73,7 +113,7 @@
 					                        </div>
 					                        <div class="col-md-6">
 						                        <?php if( have_rows('person_contact_infomation') ): ?>
-					                            	<h3>Contact Information</h3>
+					                            	<h3>Contact Infomation</h3>
 												    <ul>
 												    <?php while( have_rows('person_contact_infomation') ): the_row(); ?>
 												    	<?php if (get_sub_field( 'office_contact_type') == 'Text/SMS') : // text/mobile ?>
@@ -101,8 +141,7 @@
 					    </div><!-- .color -->
 					    <?php $i++; ?>
 						<?php endwhile; ?>
-					</div><!-- .col -->
-				</div><!-- .row -->
+
 
 				<?php
 					// Format Phone Numbers
@@ -159,3 +198,58 @@
 					  }
 					}
 					?>
+
+<!-- 					<span class="next-page"><?php next_posts_link( 'Next page', '' ); ?></span> -->
+<style>
+.page-numbers {
+	display: inline-block;
+	padding: 5px 10px;
+	margin: 0 2px 0 0;
+	border: 1px solid #eee;
+	line-height: 1;
+	text-decoration: none;
+	border-radius: 2px;
+	font-weight: 600;
+}
+.page-numbers.current,
+a.page-numbers:hover {
+	background: #f9f9f9;
+}
+</style>
+					<div class="pagination"><?php
+global $wp_query;
+
+$big = 999999999; // need an unlikely integer
+$translated = __( 'Page', 'mytextdomain' ); // Supply translatable string
+
+echo paginate_links( array(
+    'base' => str_replace( $big, '%#%', esc_url( get_pagenum_link( $big ) ) ),
+    'format' => '?paged=%#%',
+    'current' => max( 1, get_query_var('paged') ),
+    'total' => $wp_query->max_num_pages,
+        //'before_page_number' => '<span class="screen-reader-text">'.$translated.' </span>',
+) );
+?></div>
+					</div><!-- .col -->
+					<div class="col-md-4">
+			        	<?php echo do_shortcode( '[wpdreams_ajaxsearchpro id=6]' ); ?>
+			        	<?php echo do_shortcode( '[accordion]
+													    [section title="Advanced Filter"]
+														<h4>College Affiliation</h4>
+														[facetwp facet="college_affiliation"]
+														<h4>Position Type</h4>
+														[facetwp facet="academic_position"]
+														[/section]
+													[/accordion]' ); ?>
+		        	</div>
+				</div><!-- .row -->
+   			</div><!-- main_content -->
+
+    	</div><!-- uams-content -->
+    <div id="sidebar"></div>
+
+  </div>
+
+</div>
+
+<?php get_footer(); ?>

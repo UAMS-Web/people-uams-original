@@ -62,11 +62,10 @@
 					.grayBackground { background-color: #fafafa; }
 				</style>
 				<div class="row">
-
 					<div class="col-md-8 facetwp-template">
 					    <?php $i = 0; ?>
 
-					    <h1>Specialty: <?php echo single_cat_title( '', false ); ?></h1><hr>
+					    <h1>Filter: <?php echo single_term_title( '', false ); ?></h1><hr>
 
 					    <?php echo (term_description( '', false ) ? '<p>' .term_description( '', false ) . '</p>' : '' ); ?>
 

@@ -210,8 +210,8 @@
 
 			})(jQuery);
 			</script>
-			<h2>Academic</h2>
-			<div style="margin-bottom: 10px; max-width: 450px;"><?php echo do_shortcode( '[wpdreams_ajaxsearchpro id=1]' ); ?></div>
+<!-- 			<h2>Academic</h2> -->
+			<div style="margin-bottom: 10px; max-width: 450px;"><?php echo do_shortcode( '[wpdreams_ajaxsearchpro id=6]' ); ?></div>
 	        <div class="row">
 		        <div class="col-md-8">
 	                <h1 class="title-heading-left" data-fontsize="34" data-lineheight="48"><?php the_field('person_first_name'); ?> <?php echo (get_field('person_middle_name') ? get_field('person_middle_name') : ''); ?> <?php the_field('person_last_name'); ?><?php echo (get_field('person_degree') ? ', ' . get_field('person_degree') : ''); ?></h1>
@@ -232,7 +232,13 @@
 		                    <h3><?php echo $coltitle; ?></h3>
 							<ul>
 								<?php foreach( $colleges as $college ): ?>
-									<li><?php echo $college; ?></li>
+									<li>
+										<a href="<?php echo get_term_link( $college ); ?>">
+											<?php $college_name = get_term( $college, 'academic_colleges');
+												echo $college_name->name;
+											?>
+										</a>
+									</li>
 								<?php endforeach; ?>
 							</ul>
 							<?php endif; ?>
@@ -243,18 +249,25 @@
 		                <ul class="js-tablist tabs__uams_ul" data-hx="h2">
 	                    	<li class="js-tablist__item tabs__uams__li">
 	                    		<a href="#tab-overview" id="label_tab-overview" class="js-tablist__link tabs__uams__a" data-toggle="tab">
-	                            	<i class="fa fontawesome-icon fa-book"></i>Overview
+	                            	Overview
 	                            </a>
 	                        </li>
 	                        <li class="js-tablist__item tabs__uams__li">
 	                            <a href="#tab-academics" id="label_tab-academics" class="js-tablist__link tabs__uams__a" data-toggle="tab">
-		                            <i class="fa fontawesome-icon fa-graduation-cap"></i>Education
+		                            Education
 		                        </a>
 	                        </li>
+	                    <?php if(get_field('person_researcher_bio')||get_field('person_research_interests')): ?>
+	                    	<li class="js-tablist__item tabs__uams__li">
+	                            <a href="#tab-research" id="label_tab-research" class="js-tablist__link tabs__uams__a" data-toggle="tab">
+		                            Research
+		                        </a>
+	                        </li>
+	                    <?php endif; ?>
 	                    <?php if(have_rows('person_awards')||get_field('person_additional_info')): ?>
 	                    	<li class="js-tablist__item tabs__uams__li">
 	                            <a href="#tab-info" id="label_tab-info" class="js-tablist__link tabs__uams__a" data-toggle="tab">
-		                            <i class="fa fontawesome-icon fa-info-circle"></i>Additional Info
+		                            Additional Info
 		                        </a>
 	                        </li>
 	                    <?php endif; ?>
@@ -267,22 +280,38 @@
 	                            	<h3>Contact Infomation</h3>
 								    <ul>
 								    <?php while( have_rows('person_contact_infomation') ): the_row(); ?>
-								        <li><?php the_sub_field('office_contact_type')['label']; ?>: <?php the_sub_field('office_contact_value'); ?></li>
-								    <?php endwhile; ?>
+												    	<?php if (get_sub_field( 'office_contact_type') == 'Text/SMS') : // text/mobile ?>
+												    		<li><?php the_sub_field('office_contact_type')['label']; ?>: <a href="sms:<?php the_sub_field('office_contact_value'); ?>"><?php the_sub_field('office_contact_value'); ?></a></li>
+												    	<?php elseif (get_sub_field( 'office_contact_type') == 'Phone' || get_sub_field( 'office_contact_type') == 'Mobile') : // Phone ?>
+												    		<li><?php the_sub_field('office_contact_type')['label']; ?>: <a href="tel:<?php echo format_phone('base', get_sub_field('office_contact_value')); ?>"><?php echo format_phone('us', get_sub_field('office_contact_value')); ?></a></li>
+												    	<?php elseif (get_sub_field( 'office_contact_type') == 'Email') : // Email ?>
+												    		<li><?php the_sub_field('office_contact_type')['label']; ?>: <a href="mailto:<?php the_sub_field('office_contact_value'); ?>"><?php the_sub_field('office_contact_value'); ?></a></li>
+												    	<?php else : // Others ?>
+												        	<li><?php the_sub_field('office_contact_type')['label']; ?>: <?php the_sub_field('office_contact_value'); ?></li>
+												        <?php endif; ?>
+												    <?php endwhile; ?>
 								    </ul>
 								<?php endif; ?>
-			                    <?php if ( get_field('person_academic_office') ): ?>
+			                    <?php if ( get_field('person_academic_office') || get_field('person_academic_map') ): ?>
 			                    <div>
+				                    <?php if ( get_field('person_academic_office') ): ?>
 				                    <p><strong>Office:</strong> <?php the_field('person_academic_office'); ?></p>
-				                    <p>Map goes here</p>
+				                    <?php endif; ?>
+				                    <?php if ( get_field('person_academic_map') ): ?>
+				                    <div class="uams-campus-map-widget">
+					                  <iframe width="100%" height="365" src="//maps.uams.edu/full-screen/?markerid=<?php the_field('person_academic_map') ?>" frameborder="0"></iframe>
+					                  <a href="https://maps.uams.edu/map-mashup/?markerid=<?php the_field('person_academic_map') ?>" target="_blank">View larger</a>
+					                </div>
+					                <?php endif; ?>
 			                    </div>
 			                    <?php endif; ?>
 							</div>
+						<?php if(get_field('person_academic_appointment')||get_field('person_education')||get_field('physician_boards')||get_field('person_publications')||get_field('person_pubmed_author_id')): ?>
 	                        <div id="tab-academics" class="js-tabcontent tabs__uams__tabcontent">
-	                            <?php if( have_rows('academic_appointment') ): ?>
+	                            <?php if( have_rows('person_academic_appointment') ): ?>
 	                            	<h3>Academic Appointments</h3>
 								    <ul>
-								    <?php while( have_rows('academic_appointment') ): the_row(); ?>
+								    <?php while( have_rows('person_academic_appointment') ): the_row(); ?>
 								        <li><?php the_sub_field('academic_title'); ?>, <?php the_sub_field('academic_department'); ?></li>
 								    <?php endwhile; ?>
 								    </ul>
@@ -307,18 +336,44 @@
 	                            	<h3>Selected Publications</h3>
 								    <ul>
 								    <?php while( have_rows('person_publications') ): the_row(); ?>
-								        <li><?php the_sub_field('pub_authors'); ?> (<?php the_sub_field('pub_published'); ?>) <?php the_sub_field('pub_title'); ?> <em><?php the_sub_field('pub_periodical'); ?> <?php echo ( get_sub_field('pub_volume') ? the_sub_field('pub_volume') : ''); ?></em><?php echo ( get_sub_field( 'pub_issue') ? '(' . the_sub_field('pub_issue') .')' : ''); ?> <?php the_sub_field('pub_pmid'); ?> <?php the_sub_field('pub_pmcid'); ?> </li>
+								        <li><?php echo get_sub_field('publication_pubmed_info'); ?></li>
 								    <?php endwhile; ?>
 								    </ul>
 								<?php endif; ?>
+								<?php if( get_field('person_pubmed_author_id') ): ?>
+									<?php
+										$pubmedid = trim(get_field('person_pubmed_author_id'));
+										$pubmedcount = (get_field('pubmed_author_number') ? get_field('pubmed_author_number') : '3')
+
+									?>
+	                            	<h3>Latest Publications</h3>
+								    <?php echo do_shortcode( '[pubmed terms="' . urlencode($pubmedid) .'%5BAuthor%5D" count="' . $pubmedcount .'"]' ); ?>
+								<?php endif; ?>
+								<?php if( get_field('person_research_profiles_link') ): ?>
+	                            	More information is available on <a href="<?php the_field('person_research_profiles_link'); ?>">UAMS Profile Page</a>
+								<?php endif; ?>
 	                        </div>
+	                    <?php endif; ?>
+	                    <?php if(get_field('person_researcher_bio')||get_field('person_research_interests')): ?>
+	                        <div id="tab-research" class="js-tabcontent tabs__uams__tabcontent">
+	                            <?php echo (get_field('person_researcher_bio') ? get_field('person_researcher_bio') : ''); ?>
+								<?php
+									if(get_field('person_research_interests'))
+									{ ?>
+									<h3>Research Interests</h3>
+									<?php	echo get_field('person_research_interests');
+									}
+								?>
+	                        </div>
+	                    <?php endif; ?>
 						<?php if(have_rows('person_awards')||get_field('person_additional_info')): ?>
 	                        <div id="tab-info" class="js-tabcontent tabs__uams__tabcontent">
 	                            <?php if( have_rows('person_awards') ): ?>
 	                            	<h3>Awards</h3>
 								    <ul>
 								    <?php while( have_rows('person_awards') ): the_row(); ?>
-								        <li><?php the_sub_field('award_infor'); ?> (<?php the_sub_field('award_year'); ?>)</li>
+								        <li><?php the_sub_field('award_title'); ?> (<?php the_sub_field('award_year'); ?>)
+								        <?php echo (get_sub_field('award_infor') ? '<br/>' . get_sub_field('award_infor') : ''); ?></li>
 								    <?php endwhile; ?>
 								    </ul>
 								<?php endif; ?>
@@ -327,16 +382,6 @@
 									{
 										echo get_field('person_additional_info');
 									}
-/*
-									$tweets = get_field('tweet_test');
-									if($tweets)
-									{
-										foreach($tweets as $tweet) {
-											echo $tweet;
-										}
-									}
-*/
-									var_dump(get_field('tweet_test'));
 								?>
 	                        </div>
 	                    <?php endif; ?>
@@ -346,3 +391,59 @@
 	    		<script src="<?php echo get_template_directory_uri(); ?>/js/uams.tabs.min.js" type="text/javascript"></script>
 				<?php wp_reset_query(); ?>
 			</div>
+
+<?php
+					// Format Phone Numbers
+					// Usage ex. format_phone('us', '1234567890') => (123) 456-7890
+					// Base usage returns in ###-###-#### format
+					function format_phone($country, $phone) {
+					  $function = 'format_phone_' . $country;
+					  if(function_exists($function)) {
+					    return $function($phone);
+					  }
+					  return $phone;
+					}
+
+					function format_phone_us($phone) {
+					  // note: making sure we have something
+					  if(!isset($phone{3})) { return ''; }
+					  // note: strip out everything but numbers
+					  $phone = preg_replace("/[^0-9]/", "", $phone);
+					  $length = strlen($phone);
+					  switch($length) {
+					  case 7:
+					    return preg_replace("/([0-9]{3})([0-9]{4})/", "$1-$2", $phone);
+					  break;
+					  case 10:
+					   return preg_replace("/([0-9]{3})([0-9]{3})([0-9]{4})/", "($1) $2-$3", $phone);
+					  break;
+					  case 11:
+					  return preg_replace("/([0-9]{1})([0-9]{3})([0-9]{3})([0-9]{4})/", "$1($2) $3-$4", $phone);
+					  break;
+					  default:
+					    return $phone;
+					  break;
+					  }
+					}
+					function format_phone_base($phone) {
+					  // note: making sure we have something
+					  if(!isset($phone{3})) { return ''; }
+					  // note: strip out everything but numbers
+					  $phone = preg_replace("/[^0-9]/", "", $phone);
+					  $length = strlen($phone);
+					  switch($length) {
+					  case 7:
+					    return preg_replace("/([0-9]{3})([0-9]{4})/", "$1-$2", $phone);
+					  break;
+					  case 10:
+					   return preg_replace("/([0-9]{3})([0-9]{3})([0-9]{4})/", "$1-$2-$3", $phone);
+					  break;
+					  case 11:
+					  return preg_replace("/([0-9]{1})([0-9]{3})([0-9]{3})([0-9]{4})/", "$1-$2-$3-$4", $phone);
+					  break;
+					  default:
+					    return $phone;
+					  break;
+					  }
+					}
+					?>
