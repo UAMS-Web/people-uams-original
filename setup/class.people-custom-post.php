@@ -175,7 +175,10 @@ function create_clinical_conditions_taxonomy() {
 				'assign_terms' =>'edit_people'),
 			'rewrite' => array(
 				'slug' => 'conditions'
-			)
+			),
+			'show_in_rest'       		 => true,
+			'rest_base'          		 => 'condition',
+			'rest_controller_class' 	 => 'WP_REST_Terms_Controller'
 		)
 	);
 
@@ -682,11 +685,29 @@ function get_person_meta($object) {
     $data['physician_gender'] = get_post_meta( $postId, 'physician_gender', true );
     $data['physician_youtube_link'] = get_post_meta( $postId, 'physician_youtube_link', true );
     $data['physician_languages'] = get_post_meta( $postId, 'physician_languages', true );
-    //$data['physician_locations'] = get_post_meta( $postId, 'physician_locations', true );
+    //$data['physician_locations_id'] = get_post_meta( $postId, 'physician_locations', true );
+    //$data['physician_locations']['link'] = get_permalink( get_post_meta( $postId, 'physician_locations', true ) );
+    //$data['physician_locations']['title'] = get_the_title( get_post_meta( $postId, 'physician_locations', true ) );
+    //$data['physician_locations']['slug'] = get_post_field( 'post_name', get_post_meta( $postId, 'physician_locations', true ) );
+    //Locations
+    $i = 1;
 	foreach (get_post_meta( $postId, 'physician_locations', true ) as $location) {
-		$data['locations_full'][$location] = '<a href="' . get_post_permalink( $location, false ) . '">'. get_the_title( $location ) . '</a>';
-		$data['location_link'][$location] = get_post_permalink( $location );
-		$data['location_title'][$location] =  get_the_title( $location ) ;
+		$data['physician_locations'][$location]['link'] = get_permalink( $location );
+		$data['physician_locations'][$location]['title'] = get_the_title( $location );
+		$data['physician_locations'][$location]['slug'] = get_post_field( 'post_name', $location );
+		$data['physician_locations'][$location]['address'] = '<p>' . get_post_meta( $location, 'location_address_1', true).'<br/>';
+		$data['physician_locations'][$location]['address'] .= ( get_post_meta( $location, 'location_address_2', true ) ? get_post_meta( $location, 'location_address_2', true ) . '<br/>' : '');
+		$data['physician_locations'][$location]['address'] .= get_post_meta( $location, 'location_city', true ) .', '. get_post_meta( $location, 'location_state') .' '.  get_post_meta( $location, 'location_zip', true ) . '<br/>';
+		$data['physician_locations'][$location]['address'] .= get_post_meta( $location, 'location_phone', true );
+		$data['physician_locations'][$location]['address'] .=  ( get_post_meta( $location, 'location_fax', true ) ? '<br/>Fax: ' . get_post_meta( $location, 'location_fax', true ) . '' : '');
+		$data['physician_locations'][$location]['address'] .= ( get_post_meta( $location, 'location_email', true ) ? '<br/><a href="mailto:"' .get_post_meta( $location, 'location_email', true ) . '">' . get_post_meta( $location, 'location_email', true ) . '</a>' : ''); 
+		$data['physician_locations'][$location]['address'] .=  ( get_post_meta( $location, 'location_web_name', true ) ? '<br/><a href="' . get_post_meta( $location, 'location_url', true ) . '">' . get_post_meta( $location, 'location_web_name', true ) . '</a>' : '');
+		$map = get_post_meta( $location, 'location_map', true );
+		$data['physician_locations'][$location]['address'] .='<br /><a href="https://www.google.com/maps/dir/Current+Location/' . $map['lat'] .',' .$map['lng'] .'" target="_blank">Directions</a> [Opens in New Window]</p>';
+		$data['physician_locations'][$location]['map_marker'] = '<div class="marker" data-lat="'. $map['lat'] .'" data-lng="'. $map['lng'] .'" data-label="'. $i .'"></div>';
+		$i++;
+		//$data['location_link'][$location] = get_post_permalink( $location );
+		//$data['location_title'] .= get_the_title( $location ) . ',';
 	}
     $data['physician_affiliation'] = get_post_meta( $postId, 'physician_affiliation', true );
     $data['physician_appointment_link'] = get_post_meta( $postId, 'physician_appointment_link', true );
@@ -727,16 +748,16 @@ function get_person_meta($object) {
 	if( get_post_meta( $postId, 'person_academic_appointment', true ) ) :
 		for ( $i = 0; $i < get_post_meta( $postId, 'person_academic_appointment', true ); $i++ ){
 			$data['person_academic_appointment'][$i] = get_post_meta( $postId, 'person_academic_appointment_' . $i .'_academic_title', true ) . ': ' . get_post_meta( $postId, 'person_academic_appointment_' . $i .'_academic_department', true );
-			$data['academic_title'][$i] = get_post_meta( $postId, 'person_academic_appointment_' . $i .'_academic_title', true );
-			$data['academic_department'][$i] =  get_post_meta( $postId, 'person_academic_appointment_' . $i .'_academic_department', true );
+			//$data['academic_title'][$i] = get_post_meta( $postId, 'person_academic_appointment_' . $i .'_academic_title', true );
+			//$data['academic_department'][$i] =  get_post_meta( $postId, 'person_academic_appointment_' . $i .'_academic_department', true );
 		}
 	endif;
 	if( get_post_meta( $postId, 'person_education', true ) ) :
 		for ( $i = 0; $i < get_post_meta( $postId, 'person_education', true ); $i++ ){
 			$data['person_education'][$i] = get_post_meta( $postId, 'person_education_' . $i .'_person_education_type', true ) . ': ' . get_post_meta( $postId, 'person_education_' . $i .'_person_education_school', true ) . ' ' . get_post_meta( $postId, 'person_education_' . $i .'_person_education_description', true );
-			$data['person_education_type'][$i] = get_post_meta( $postId, 'person_education_' . $i .'_person_education_type', true );
-			$data['person_education_school'][$i] = get_post_meta( $postId, 'person_education_' . $i .'_person_education_school', true );
-			$data['person_education_description'][$i] =  get_post_meta( $postId, 'person_education_' . $i .'_person_education_description', true );
+			//$data['person_education_type'][$i] = get_post_meta( $postId, 'person_education_' . $i .'_person_education_type', true );
+			//$data['person_education_school'][$i] = get_post_meta( $postId, 'person_education_' . $i .'_person_education_school', true );
+			//$data['person_education_description'][$i] =  get_post_meta( $postId, 'person_education_' . $i .'_person_education_description', true );
 		}
 	endif;
 	//Research
@@ -745,20 +766,21 @@ function get_person_meta($object) {
 	//Additional
 	if( get_post_meta( $postId, 'person_awards', true ) ) :
 		for ( $i = 0; $i < get_post_meta( $postId, 'person_awards', true ); $i++ ){
-			$data['person_education'][$i] = get_post_meta( $postId, 'person_awards_' . $i .'_award_title', true ) . ' (' . get_post_meta( $postId, 'person_awards_' . $i .'_award_year', true ) . ') ' . get_post_meta( $postId, 'person_awards_' . $i .'_award_infor', true );
-			$data['award_year'][$i] = get_post_meta( $postId, 'person_awards_' . $i .'_award_year', true );
-			$data['award_title'][$i] = get_post_meta( $postId, 'person_awards_' . $i .'_award_title', true );
-			$data['award_infor'][$i] =  get_post_meta( $postId, 'person_awards_' . $i .'_award_infor', true );
+			$data['person_awards'][$i] = get_post_meta( $postId, 'person_awards_' . $i .'_award_title', true ) . ' (' . get_post_meta( $postId, 'person_awards_' . $i .'_award_year', true ) . ') ' . get_post_meta( $postId, 'person_awards_' . $i .'_award_infor', true );
+			//$data['award_year'][$i] = get_post_meta( $postId, 'person_awards_' . $i .'_award_year', true );
+			//$data['award_title'][$i] = get_post_meta( $postId, 'person_awards_' . $i .'_award_title', true );
+			//$data['award_infor'][$i] =  get_post_meta( $postId, 'person_awards_' . $i .'_award_infor', true );
 		}
 	endif;
 	$data['person_additional_info'] = get_post_meta( $postId, 'person_additional_info', true );
 
-
-	//$data['tsuser'] = get_post_meta( $postId, '_tsuser', true );
-	//$data['tsfreehtml'] = get_post_meta( $postId, '_tsfreehtml', true );
-	//$data['tspersonal'] = get_post_meta( $postId, '_tspersonal', true );
-	//$data['tspersonalanchor'] = get_post_meta( $postId, '_tspersonalanchor', true );
-	//$data['tslocation'] = get_post_meta( $postId, '_tslocation', true );
     return $data;
 }
 add_action('rest_api_init', 'rest_api_person_meta');
+
+// Add REST API query var filters
+add_filter('rest_query_vars', 'people_add_rest_query_vars');
+function people_add_rest_query_vars($query_vars) {
+    $query_vars = array_merge( $query_vars, array('meta_key', 'meta_value', 'meta_compare') );
+    return $query_vars;
+}
