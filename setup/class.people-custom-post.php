@@ -738,6 +738,13 @@ function get_person_meta($object) {
 	$data['person_research_profiles_link'] = get_post_meta( $postId, 'person_research_profiles_link', true );
 	$data['person_pubmed_author_id'] = get_post_meta( $postId, 'person_pubmed_author_id', true );
 	$data['pubmed_author_number'] = get_post_meta( $postId, 'pubmed_author_number', true );
+	if( get_post_meta( $postId, 'person_publications', true ) ) :
+		$i = 0;
+		foreach (get_post_meta( $postId, 'person_publications', true ) as $publication) {
+			$data['person_publication'][$i] = get_post_meta( $postId, 'person_publications_' . $i .'_publication_pubmed_info', true );
+			$i++;
+		}
+	endif;
 	if( get_post_meta( $postId, 'person_contact_infomation', true ) ) :
 		for ( $i = 0; $i < get_post_meta( $postId, 'person_contact_infomation', true ); $i++ ){
 			$data['office_full'][$i] = get_post_meta( $postId, 'person_contact_infomation_' . $i . '_office_contact_type', true ) . ': ' . get_post_meta( $postId, 'person_contact_infomation_' . $i . '_office_contact_value', true );
