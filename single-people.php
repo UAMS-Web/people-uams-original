@@ -39,17 +39,17 @@
 				if ($isItPhysician!==false)
 				{
 				    //url contains 'physician'
-				    get_template_part( 'templates/content-physician' );
+				    get_template_part( 'templates/template-single-physician' );
 				}
 				elseif ($isItAcademic!==false)
 				{
 				    //url contains 'academic'
-				    get_template_part('templates/content-academic' );
+				    get_template_part('templates/template-single-academic' );
 				}
 				else
 				{
 					//load base
-					get_template_part('templates/content-people' );
+					get_template_part('templates/template-single-people' );
 				}
 				?>
 

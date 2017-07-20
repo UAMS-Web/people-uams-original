@@ -49,19 +49,19 @@
 				{
 				    //url contains 'physician'
 				    //echo "<h4>Physician</h4>";
-				    get_template_part( 'templates/list-physician' );
+				    get_template_part( 'templates/template-archive-physician' );
 				}
 				elseif ($isItAcademic!==false)
 				{
 				    //url contains 'academic'
 				    //echo "<h4>Academic Profiles</h4>";
-				    get_template_part('templates/list-academic' );
+				    get_template_part('templates/template-archive-academic' );
 				}
 				else
 				{
 					//load base
 					echo "<h4>Base Profiles</h4>";
-					get_template_part('templates/list-people' );
+					get_template_part('templates/template-archive-people' );
 				}
 				?>
 
